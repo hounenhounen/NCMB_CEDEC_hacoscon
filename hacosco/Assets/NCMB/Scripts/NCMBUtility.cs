@@ -52,7 +52,7 @@ namespace NCMB.Internal
 
 
 
-		//estimatedDataのvalueの値がオブジェクト型の場合はここで適切に変換
+		//estimatedDataのvalueの値がオブジェクト型の場合はここで変換
 		private static IDictionary<string, object> _encodeJSONObject (object value, bool allowNCMBObjects)
 		{
 			//日付型をNifty仕様に変更してクラウドに保存
@@ -88,7 +88,7 @@ namespace NCMB.Internal
 				return GeoDic;
 			}
 
-			//MiniJsonで処理できる
+			
 			if (value is IDictionary) {
 				Dictionary<string, object> beforeDictionary = new Dictionary<string, object> ();
 				IDictionary afterDictionary = (IDictionary)value;
@@ -137,8 +137,6 @@ namespace NCMB.Internal
 		internal static object _maybeEncodeJSONObject (object value, bool allowNCMBObjects)
 		{
 
-			//save経由はます最初は必ずこちらを通る。
-			//各オペレーションのエンコードで再びこのメソッド実行される
 			if ((value is INCMBFieldOperation)) {
 				return ((INCMBFieldOperation)value).Encode ();
 			}
@@ -146,16 +144,15 @@ namespace NCMB.Internal
 			//リストの値を全てJSON形式に変換
 			//各値を_maybeEncodeJSONObjectで各JSON形式に変換
 			if (value is IList) {
-				//return _encodeAsJSONArray ((List<object>)value, allowNCMBObjects);
 				return _encodeAsJSONArray ((IList)value, allowNCMBObjects);
 			}
-			//次に各operationクラスのエンコードで呼ばれるので二度目はこちらを通る
+
 			//各オブジェクト毎に変換(特殊型)が必要であれば変換、なければvalueを返す
 			IDictionary<string, object> jsonDic = _encodeJSONObject (value, allowNCMBObjects);
 			if (jsonDic != null) {
 				return jsonDic;
 			}
-			//特にオブジェクト変換が必要ない場合はこちら
+			//特にオブジェクト変換が必要ない場合
 			return value;
 		}
 		

@@ -102,7 +102,6 @@ namespace NCMB.Internal
 					}
 				}
 
-				//同じNCMBObjectだったら重複しないようAPI側でさばいているかも
 				IEnumerator localEnumerator = this.objects.GetEnumerator ();
 				while (localEnumerator.MoveNext()) {
 					object objectsValue = (object)localEnumerator.Current;
@@ -111,15 +110,15 @@ namespace NCMB.Internal
 						//existingObjectIdsのvalue:連番を返す。なければnull
 						NCMBObject objectsNCMBObject = (NCMBObject)objectsValue;
 						if (existingObjectIds.ContainsKey (objectsNCMBObject.ObjectId)) {
-							//すでにある
+							//すでにある場合
 							int index = Convert.ToInt32 (existingObjectIds [objectsNCMBObject.ObjectId]);	
 							result.Insert (index, objectsValue);
 						} else {
-							//ユニークなのでadd。追加する
+							//ユニークのため追加する
 							result.Add (objectsValue);
 						}
 					} else if (!result.Contains (objectsValue)) {
-						//基本的にこちら。重複していない値のみaddする
+						//重複していない値のみaddする
 						result.Add (objectsValue);
 					}
 				}

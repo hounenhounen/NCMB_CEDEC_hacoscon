@@ -325,7 +325,7 @@ namespace NCMB
 		}
 
 
-		//現状WhereNotContainedInと全く同じ機能のためコメントアウトしています
+		//WhereNotContainedInと同じ機能のため
 		/*
 		/// <summary>
 		/// いずれも含まれない。
@@ -520,13 +520,12 @@ namespace NCMB
 			value = NCMBUtility._maybeEncodeJSONObject (value, true);
 			if (_where.ContainsKey (key)) {
 				//キーの前回条件がWhereEqualToだった場合はint型 それ以外はDictionary型が入る
-				//WhereEqualToのみ_addCondition経由で保存されないためint型※仕様上[$]指定がないので
 				object existingValue = _where [key];
 				if (existingValue is IDictionary) {
 					whereValue = (Dictionary<string, object>)existingValue;
 				}
 			}
-			//初回またはキーの前回条件がWhereEqualToだった場合はこちら
+			//初回またはキーの前回条件がWhereEqualToだった場合
 			if (whereValue == null) {
 				whereValue = new Dictionary<string, object> ();
 			}
@@ -573,7 +572,6 @@ namespace NCMB
 				Dictionary<string , object> resultObj;
 				List<T> resultList = new List<T> ();
 				ArrayList convertResultList = null;
-				//中でエラー処理いるかも
 				try {
 					if (error == null) {
 						resultObj = MiniJSON.Json.Deserialize (responseData) as Dictionary<string, object>;
@@ -594,10 +592,6 @@ namespace NCMB
 			});
 		}
 
-		/// <summary>
-		/// <para>FindAsync用レスポンス処理</para>
-		/// <para>_mergeFromServerを呼びレスポンスデータ(JSONテキスト)からNCMBObject(リスト)を作成する</para>
-		/// </summary>
 		private ArrayList _convertFindResponse (Dictionary<string , object> response)
 		{
 			ArrayList answer = new ArrayList ();
@@ -618,12 +612,8 @@ namespace NCMB
 				for (int i = 0; i < results.Count; i++) {
 					NCMBObject obj = null;
 					if (resultClassName.Equals ("user")) {
-						//resultClassNameは渡さなくて良い
-						//Android準拠[classNameはuserで固定][UserNameはresultのユーザー名]
 						obj = new NCMBUser ();
 					} else if (resultClassName.Equals ("role")) {
-						//Android準拠[classNameはroleで固定][Rolenameはresultのロール名]
-						//ここでresultClassName渡さなくてもobjectId,className諸々mergeFromeServerが行なう
 						obj = new NCMBRole ();
 					} else {
 						obj = new NCMBObject (resultClassName);
@@ -735,13 +725,13 @@ namespace NCMB
 							resultObj = MiniJSON.Json.Deserialize (responseData) as Dictionary<string, object>;
 							object objectCount = null;
 							if (resultObj.TryGetValue ("count", out objectCount)) {
-								count = Convert.ToInt32 (objectCount);//キーcountの値は必ず同じ型なので型チェック時の変換チェックは無し
+								count = Convert.ToInt32 (objectCount);
 							}
 						} catch (Exception e) {
 							error = new NCMBException (e);
 						}
 					}
-					//引数は検索条件のカウント数とエラーをユーザーに返す
+					//引数は検索条件のカウント数とエラーを返す
 					Platform.RunOnMainThread (delegate {
 						callback (count, error);
 					});
@@ -752,23 +742,21 @@ namespace NCMB
 		}
 
 
-		//url 例：https://mb.api.cloud.nifty.com/2013-09-01/classes/SaveTest?
-		//beforejsonData 例：{classname:SaveTest,ｗhere:{},limit:5}
 		//beforejsonDataの各値をJSON化→エンコードしurlに結合する
 		private string _makeWhereUrl (string url, Dictionary<string, object> beforejsonData)
 		{
 
-			StringBuilder sb = new StringBuilder ();//例：https://mb.api.cloud.nifty.com/2013-09-01/classes/SaveTest?where=%7B%7D&limit=5&
+			StringBuilder sb = new StringBuilder ();
 			sb.Append (url);
-			foreach (string key in beforejsonData.Keys) {//例 key= where , limit
-				//if (key.Equals ("classname")) {//修正前　小文字のclassnameがくる場合は要注意
+			foreach (string key in beforejsonData.Keys) {
+				//if (key.Equals ("classname")) {
 				if (key.Equals ("className")) {
 					continue;
 				}
 
 				Dictionary<string, object> whereDic;
-				int intValue;//Json化前のkeyの値【limit】　例：{} , 5
-				string jsonValue;//Json化後のKeyの値　例：{} , 5
+				int intValue;
+				string jsonValue;
 				//where の valueはDictionary型　limit の　valueはint型　
 				if (beforejsonData [key] is IDictionary) {
 					//whre
@@ -782,8 +770,8 @@ namespace NCMB
 					//その他
 					jsonValue = (string)beforejsonData [key];
 				}
-				string encodeJsonValue = Uri.EscapeUriString (jsonValue);//JSON化された値をエンコードされた文字列 　例：%7B%7D , 5
-				encodeJsonValue = encodeJsonValue.Replace (":", "%3A");//「$」と「,」もAndroidは変換しているがこの二つは変換しなくても結果は同じ
+				string encodeJsonValue = Uri.EscapeUriString (jsonValue);//JSON化された値をエンコードされた文字列 
+				encodeJsonValue = encodeJsonValue.Replace (":", "%3A");
 
 				//結合
 				sb.Append (key).Append ("=").Append (encodeJsonValue).Append ("&");
@@ -873,12 +861,9 @@ namespace NCMB
 			}
 
 			Dictionary<string , object> jsonBefore = (Dictionary<string , object>)value;
-			//Dictionary<string , object> jsonAfter = null;//foreachの中でjsonBeforeに値を追加しているため永遠とforeachが回るのを防ぐ
-
+			
 			Dictionary<string , object> jsonAfter = new Dictionary<string,object> ();
 			foreach (KeyValuePair<string, object> pair in jsonBefore) {
-				//元々はNCMBQuery<T>でまとめて出来たがinQueryでサブクエリQuery<NCMBObjcet>とメインクエリ<NCMBUser>が来た時さばけないため
-				//それぞれの型で対応する。NCMBFile等追加するときは要注意
 				if (pair.Value is NCMBQuery<NCMBObject>) {
 					NCMBQuery<NCMBObject> query = (NCMBQuery<NCMBObject>)pair.Value;
 					Dictionary<string , object> realData = query._getFindParams ();
@@ -949,12 +934,10 @@ namespace NCMB
 				//url = new NCMBRole().getBaseUrl();
 			} else {
 				// オブジェクト検索API
-				//※サブクラスを作るときはここでAndroidSDK,NCMBOBjectのcreateメソッドをつくる必要有り
 				url = new NCMBObject (_className)._getBaseUrl ();
 			}
 			return url;
 		}
-
 
 		/// <summary>
 		/// クラスの新しいクエリを作成します。

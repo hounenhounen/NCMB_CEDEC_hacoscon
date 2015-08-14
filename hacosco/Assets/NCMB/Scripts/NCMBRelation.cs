@@ -85,7 +85,7 @@ namespace NCMB
 		/// <param name="obj">オブジェクト</param>
 		public void Remove (T obj)
 		{
-			//すでにAddが実行されていた場合、Remove時の引数と違うobjectならばエラー
+			//すでにAddが実行されていた場合
 			this._removeDuplicationCheck (obj);
 
 			HashSet<T> removeObj = new HashSet<T> ();
@@ -98,8 +98,8 @@ namespace NCMB
 		//前回Addした中身のオブジェクトをチェック。重複しなければエラー。
 		private void _removeDuplicationCheck (T obj)
 		{
-			//1.履歴取り出し 2.NCMBRelationOperationかチェック 3.Operationが保持しているaddListのオブジェクトをチェック
-			//4.引数のobjectIdとList内のobjectIdが一つでも同じものであればOK、なければエラー
+
+			//objectIdとList内のobjectIdが一つでも同じものがなければエラー
 			if (this._parent._currentOperations.ContainsKey (_key)) {
 				if (this._parent._currentOperations [_key] is NCMBRelationOperation<T>) {
 					NCMBRelationOperation<T> relationOperation = (NCMBRelationOperation<T>)this._parent._currentOperations [_key];
@@ -121,8 +121,7 @@ namespace NCMB
 		//前回Removeした中身のオブジェクトのチェック。重複しなければエラー。
 		private void _addDuplicationCheck (T obj)
 		{
-			//1.履歴取り出し 2.NCMBRelationOperationかチェック 3.Operationが保持しているremoveListのオブジェクトをチェック
-			//4.引数のobjectIdとList内のobjectIdが一つでも同じものであればOK、なければエラー
+			//objectIdとList内のobjectIdが一つでも同じものがなければエラー
 			if (this._parent._currentOperations.ContainsKey (_key)) {
 				if (this._parent._currentOperations [_key] is NCMBRelationOperation<T>) {
 					NCMBRelationOperation<T> relationOperation = (NCMBRelationOperation<T>)this._parent._currentOperations [_key];

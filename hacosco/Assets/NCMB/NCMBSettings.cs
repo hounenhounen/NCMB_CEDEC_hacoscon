@@ -36,32 +36,27 @@ namespace NCMB
 		internal static bool _responseValidationFlag = false;
 		//初回のみ実行フラグ
 		private static bool _isInitialized = false;
-		//PUSH通知フラグ
-		private static bool _usePush = false;
-		//開封通知フラグ
-		private static bool _useAnalytics = false;
+
 		//static NG
 		[SerializeField]
 		internal string
-			applicationKey = "";
+		applicationKey = "";
 		[SerializeField]
 		internal string
-			clientKey = "";
+		clientKey = "";
 		[SerializeField]
 		internal bool
-			usePush = false;
-		[SerializeField]
-		internal bool
-			useAnalytics = false;
+		usePush = false;
 		[SerializeField]
 		internal string
-			androidSenderId = "";
+		androidSenderId = "";
 		//[SerializeField]
 		//internal bool
 		//getLocation = false;
 		[SerializeField]
 		internal bool
-			responseValidation = false;
+		responseValidation = false;
+
 		//Current user
 		private static string _currentUser = null;
 		internal static string filePath;
@@ -103,29 +98,14 @@ namespace NCMB
 		}
 
 		/// <summary>
-		/// Android SenderIdの取得を行います。
+		/// Android Sender Id
 		/// </summary>
 		public static string AndroidSenderId {
 			get {
 				return _androidSenderId;
 			}
-		}
-
-		/// <summary>
-		/// プッシュ通知設定の取得を行います。
-		/// </summary>
-		public static bool UsePush {
-			get {
-				return _usePush;
-			}
-		}
-
-		/// <summary>
-		/// 開封通知設定の取得を行います。
-		/// </summary>
-		public static bool UseAnalytics {
-			get {
-				return _useAnalytics;
+			set {
+				_androidSenderId = value;
 			}
 		}
 
@@ -148,38 +128,37 @@ namespace NCMB
 			// クライアントキーを設定
 			_clientKey = clientKey;
 			// Native Initialize
-			NCMBPush.Init (applicationKey, clientKey);
+			NCMBPush.Init(applicationKey, clientKey);
 		}
 
 		/// <summary>
-		/// iOS,Androidそれぞれの端末登録を行う
+		/// Registers the push.
 		/// </summary>
-		/// <param name="usePush">true:プッシュ通知有効　false:プッシュ通知無効</param>
-		/// <param name="useAnalytics">true:開封通知有効　false:開封通知無効</param>
-		/// <param name="androidSenderId">Android SenderId</param>
-		/// <param name="getLocation">true:位置情報有効　false:位置情報無効</param>
-		private static void RegisterPush (bool usePush, bool useAnalytics, String androidSenderId, bool getLocation = false)
+		/// <param name="usePush">If set to <c>true</c> use push.</param>
+		/// <param name="androidSenderId">Android sender identifier.</param>
+		/// <param name="getLocation">If set to <c>true</c> get location.</param>
+		private static void RegisterPush(bool usePush, String androidSenderId, bool getLocation = false)
 		{
-		
-			//Push関連設定
-			_usePush = usePush;
-			_useAnalytics = useAnalytics;
+			// Sender idを設定
 			_androidSenderId = androidSenderId;
 
 			// Register
-			if (usePush) {
-				if (!getLocation) {
+			if (usePush)
+			{
+				if (!getLocation)
+				{
 					#if UNITY_ANDROID
-					NCMBPush.Register (androidSenderId, useAnalytics);
+					NCMBPush.Register(androidSenderId);
 					#elif UNITY_IOS
-					NCMBPush.Register (useAnalytics);
+					NCMBPush.Register();
 					#endif
-				} else {
+				}
+				else
+				{
 					#if UNITY_ANDROID
-					//not Analytics
-					NCMBPush.RegisterWithLocation (androidSenderId);
+					NCMBPush.RegisterWithLocation(androidSenderId);
 					#elif UNITY_IOS
-					NCMBPush.RegisterWithLocation ();
+					NCMBPush.RegisterWithLocation();
 					#endif
 				}
 			}
@@ -206,7 +185,7 @@ namespace NCMB
 				DontDestroyOnLoad (base.gameObject);
 				NCMBSettings.Initialize (this.applicationKey, this.clientKey);
 				//NCMBSettings.RegisterPush(this.usePush, this.androidSenderId, this.getLocation);
-				NCMBSettings.RegisterPush (this.usePush, this.useAnalytics, this.androidSenderId, false);
+				NCMBSettings.RegisterPush(this.usePush, this.androidSenderId, false);
 				filePath = Application.persistentDataPath;
 				base.StartCoroutine (Platform.RunLoop ());
 			}

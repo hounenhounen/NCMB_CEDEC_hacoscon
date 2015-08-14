@@ -26,11 +26,10 @@ namespace NCMB
 	[NCMBClassName("role")]
 	public class NCMBRole : NCMBObject
 	{
-		//入力された文字列がroleNameとして適当か調べるなど。
 		private static readonly Regex namePattern = new Regex ("^[0-9a-zA-Z_\\- ]+$");
 
 		// コンストラクター
-		// NCMBQueryの_getSearchUrlで使用。※_getBaseUrlにアクセスするため
+		// NCMBQueryの_getSearchUrlで使用
 		internal NCMBRole ()
 		{
 		}

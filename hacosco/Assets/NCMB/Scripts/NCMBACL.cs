@@ -103,7 +103,7 @@ namespace NCMB
 			} catch (NCMBException e) {
 				throw new NCMBException (e);			
 			}			
-			//unresolvedユーザ処理必要ならここに書く			
+
 			return copy;			
 		}
 

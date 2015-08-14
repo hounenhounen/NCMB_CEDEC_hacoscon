@@ -25,7 +25,7 @@ using System.Linq;
 using System.Text;
 
 namespace NCMB
-{
+{				
 	/// <summary>
 	/// オブジェクト操作を扱います。
 	/// </summary>
@@ -39,13 +39,12 @@ namespace NCMB
 		internal readonly object mutex = new object ();
 		internal readonly static object fileMutex = new object ();
 		private readonly LinkedList<IDictionary<string, INCMBFieldOperation>> operationSetQueue = new LinkedList<IDictionary<string, INCMBFieldOperation>> ();
-
 		internal delegate void AsyncDelegate ();
-
 		private string _className;
 		private string _objectId;
 		private DateTime? _updateDate;
-		private DateTime? _createDate;
+		private DateTime? _createDate ;
+
 
 		/// <summary>
 		/// オブジェクトの取得、または設定を行います。
@@ -76,7 +75,7 @@ namespace NCMB
 
 					return val;
 				} finally {
-					Monitor.Exit (obj);//ロック解放。ここに書くことでtryの中でエラーが発生しても正しく解放される。
+					Monitor.Exit (obj);//ロック解放
 				}
 			}
 			set {
@@ -97,14 +96,14 @@ namespace NCMB
 				}
 			}
 		}
-
+		
 		internal virtual void _onSettingValue (string key, object value)
 		{
 			if (key == null) {
 				throw new NCMBException (new ArgumentNullException ("key"));
 			}
 		}
-
+		
 		/// <summary>
 		/// オブジェクトクラス名の取得を行います。
 		/// </summary>
@@ -116,7 +115,7 @@ namespace NCMB
 				this._className = value;
 			}
 		}
-
+		
 		/// <summary>
 		/// objectIdの取得、または設定を行います。
 		/// </summary>
@@ -135,7 +134,8 @@ namespace NCMB
 				}
 			}
 		}
-
+		
+		
 		/// <summary>
 		/// オブジェクト更新時刻の取得を行います。
 		/// </summary>
@@ -147,7 +147,7 @@ namespace NCMB
 				this._updateDate = value;
 			}	
 		}
-
+		
 		/// <summary>
 		/// オブジェクト登録日時の取得を行います。
 		/// </summary>
@@ -187,6 +187,7 @@ namespace NCMB
 				return dstAcl;
 			}
 		}
+		
 		//_checkGetAccess(This)で扱う
 		//dataAvailabilityに指定したキーがない場合はfalseを返す
 		private bool _checkIsDataAvailable (string key)
@@ -194,6 +195,7 @@ namespace NCMB
 			bool result = (this.dataAvailability.ContainsKey (key) && this.dataAvailability [key]);
 			return result;
 		}
+		
 		//ThisのGetで扱う　キーのフェッチの必要性チェック
 		//_checkIsDataAvailableがfalseの場合はfetchが必要とExceptionを吐く
 		private void _checkGetAccess (string key)
@@ -202,7 +204,7 @@ namespace NCMB
 				throw new NCMBException (new InvalidOperationException ("NCMBObject has no data for this key.  Call FetchAsync() to get the data."));
 			}
 		}
-
+		
 		/// <summary>
 		/// オブジェクトが変更済みかどうか、判定の取得を行います。
 		/// </summary>
@@ -229,11 +231,13 @@ namespace NCMB
 				}
 			}
 		}
+		
 		//saveする必要がある場合(変更有)はtrue、saveする必要がない場合(変更無)はfalseを返却
 		private bool _checkIsDirty (bool considerChildren)
 		{
 			return this._dirty || this._currentOperations.Count > 0 || (considerChildren && this._hasDirtyChildren ());
 		}
+		
 		//保存が必要(Dirtyがtrue)なNCMBObjectが追加されたリストを返す
 		private bool _hasDirtyChildren ()
 		{ 
@@ -247,6 +251,7 @@ namespace NCMB
 				Monitor.Exit (obj);
 			}
 		}
+		
 		//NCMBObjectがないか検索をかける
 		private static void _findUnsavedChildren (object data, List<NCMBObject> unsaved)
 		{
@@ -269,7 +274,7 @@ namespace NCMB
 				}
 			}					
 		}
-
+		
 		/// <summary>
 		/// オブジェクトに格納されている、Keyの取得を行います。
 		/// </summary>
@@ -286,6 +291,7 @@ namespace NCMB
 				return keys;
 			}
 		}
+		
 		//userのようなNCMBObjectを継承するクラスのコンストラクタを実装するため
 		internal NCMBObject () : this (NCMBObject.AUTO_CLASS_NAME)
 		{
@@ -307,7 +313,9 @@ namespace NCMB
 			}
 			return relation;
 		}
-
+		
+		
+		
 		/// <summary>
 		/// コンストラクター。<br/>
 		/// 指定クラス名のオブジェクトを生成します。
@@ -333,6 +341,7 @@ namespace NCMB
 			this._setDefaultValues ();
 			
 		}
+		
 		//渡されたオペレーション処理の実行
 		internal void _performOperation (string key, INCMBFieldOperation operation)
 		{
@@ -360,12 +369,14 @@ namespace NCMB
 				Monitor.Exit (obj);
 			}
 		}
+		
 		//一番最後の履歴の取り出し
 		internal IDictionary<string, INCMBFieldOperation> _currentOperations {
 			get {
 				return this.operationSetQueue.Last.Value;
 			}
 		}
+		
 		//一番最後の履歴の取り出し、空のリスト(次に入る履歴の入れ物)の追加
 		internal IDictionary<string, INCMBFieldOperation> StartSave ()
 		{
@@ -381,25 +392,28 @@ namespace NCMB
 			}
 			return result;
 		}
+		
 		//入力値の型チェックを行なう
 		internal static bool _isValidType (object value)
 		{
 			return value == null || value is string || value is NCMBObject || value is NCMBGeoPoint || value is DateTime ||
-			value is IDictionary || value is IList || value is NCMBACL || value.GetType ().IsPrimitive () || value is NCMBRelation<NCMBObject>;
+				value is IDictionary || value is IList || value is NCMBACL || value.GetType ().IsPrimitive () || value is NCMBRelation<NCMBObject>;
 		}
+		
 		//リストの型チェックを行う
 		//RemoveRangeFromList,AddRangeToList,AddRangeUniqueToListの三カ所で使用
 		internal void  _listIsValidType (IEnumerable values)
 		{
 			IEnumerator validCheck = values.GetEnumerator ();
-			while (validCheck.MoveNext ()) {
+			while (validCheck.MoveNext()) {
 				object val = (object)validCheck.Current;
 				if (!_isValidType (val)) {
 					throw new NCMBException (new ArgumentException ("invalid type for value: " + val.GetType ().ToString ()));
 				}
 			}
 		}
-
+		
+		
 		/// <summary>
 		/// 最後に保存を行った状態に戻します。
 		/// </summary>
@@ -413,7 +427,7 @@ namespace NCMB
 				this._dirty = false;
 			}
 		}
-
+		
 		private void _rebuildEstimatedData ()
 		{
 			object obj;
@@ -428,7 +442,7 @@ namespace NCMB
 				Monitor.Exit (obj);
 			}
 		}
-
+		
 		private void _updateLatestEstimatedData ()
 		{
 			object obj;
@@ -445,7 +459,7 @@ namespace NCMB
 				Monitor.Exit (obj);
 			}
 		}
-
+		
 		private void _applyOperations (IDictionary<string, INCMBFieldOperation> operations, IDictionary<string, object> map)
 		{
 			object obj;
@@ -465,7 +479,7 @@ namespace NCMB
 				Monitor.Exit (obj);
 			}
 		}
-
+		
 		/// <summary>
 		/// 指定したキーに値を設定します。<br/>
 		/// すでにあるキーを指定した場合はエラーを返します。
@@ -475,7 +489,7 @@ namespace NCMB
 		public virtual void Add (string key, object value)
 		{
 			object obj;
-			Monitor.Enter (obj = this.mutex);//排他的処理
+			Monitor.Enter (obj = this.mutex);
 			try {
 				//keyとvalueのnullチェック
 				if (key == null) {
@@ -489,13 +503,13 @@ namespace NCMB
 				if (this.estimatedData.ContainsKey (key)) {
 					throw new NCMBException (new ArgumentException ("Key already exists", key));
 				}
-				//thisメソッド(items)にてsetOperationで履歴作成
+				//thisにてsetOperationで履歴作成
 				this [key] = value;
 			} finally {
 				Monitor.Exit (obj);
 			}
 		}
-
+		
 		/// <summary>
 		/// 指定したキーのフィールドが存在する場合、フィールドを削除します。<br/>
 		/// 指定キーが無い場合でも、エラーは返しません。
@@ -517,7 +531,7 @@ namespace NCMB
 				Monitor.Exit (obj);
 			}
 		}
-
+		
 		/// <summary>
 		/// キーで指定された配列から一致する複数のオブジェクトを削除します。<br/>
 		/// saveAsync()実行時に指定したオブジェクトの削除を行います。
@@ -543,32 +557,29 @@ namespace NCMB
 					}
 					
 					
-					//１．取り出したローカルデータから今回の引数で渡されたオブジェクトの削除
+					//取り出したローカルデータから今回の引数で渡されたオブジェクトの削除
 					//例：estimatedData(result)＝{1,NCMBObject}　引数(values)={2,NCMBObject}の時,結果:{1}
 					ArrayList result = new ArrayList (value);
 					foreach (object removeObj in values) {
-						while (result.Contains (removeObj)) {//removeAllと同等
+						while (result.Contains(removeObj)) {//removeAllと同等
 							result.Remove (removeObj);
 						}
 					}
 					
-					//ここから下は引数の中で「NCMBObjectが保存されているかつ、
-					//estimatedData(result)の中の一致するNCMBObjectが消せなかった」時の処理です。
-					//つまり　「上で消せなかったNCMBObject=インスタンスが違う」
-					//estimatedData(result)の中のNCMBObjectと引数のNCMBObjectがどちらもnewで作られたものなら上で消せるが、
-					//どちらかがnewでどちらかがCreateWithoutDataで作られた場合は上で消せない。
-					//そのため下の処理はobjectIdで検索をかけてobjectIdが一致するNCMBObjectの削除を行う
+					//NCMBObject重複時の処理
+					//どちらかがnewでどちらかがCreateWithoutDataで作られた場合はインスタンスが違うので、
+					//objectIdで検索をかけてobjectIdが一致するNCMBObjectの削除を行う
 					
-					//２．今回引数で渡されたオブジェクトから１.のオブジェクトの削除
+					//今回引数で渡されたオブジェクトから１.のオブジェクトの削除
 					//例：引数(objectsToBeRemoved)＝{2,NCMBObject}　1の結果={1}の時,結果:{2,NCMBObject}
 					ArrayList objectsToBeRemoved = new ArrayList ((IList)values);
 					foreach (object removeObj2 in result) {
-						while (objectsToBeRemoved.Contains (removeObj2)) {//removeAllと同等
+						while (objectsToBeRemoved.Contains(removeObj2)) {//removeAllと同等
 							objectsToBeRemoved.Remove (removeObj2);
 						}
 					}
 					
-					//３．２の結果のリスト（引数）の中のNCMBObjectがすでに保存されている場合はobjectIdを返す
+					//結果のリスト（引数）の中のNCMBObjectがすでに保存されている場合はobjectIdを返す
 					//まだ保存されていない場合はnullを返す
 					//例：CreateWithoutDataの場合「objectIds　Value:ppmQNGZahXpO8YSV」newの場合「objectIds　Value:null」
 					HashSet<object> objectIds = new HashSet<object> ();
@@ -578,9 +589,7 @@ namespace NCMB
 							objectIds.Add (valuesNCMBObject.ObjectId);
 						}
 						
-						//４．resultの中のNCMBObjectからobjectIdsの中にあるObjectIdと一致するNCMBObjectの削除
-						//ここだけfor文で対応している理由は,
-						//「foreach文により要素を列挙している最中には、そのリスト(result)から要素を削除することはできない(Exception吐く)」
+						//resultの中のNCMBObjectからobjectIdsの中にあるObjectIdと一致するNCMBObjectの削除
 						//例：上記の例の場合の結果result = {1}				
 						object resultValue;
 						for (int i = 0; i < result.Count; i++) {
@@ -605,7 +614,7 @@ namespace NCMB
 				this._performOperation (key, operation);
 			}
 		}
-
+		
 		/// <summary>
 		/// キーで指定された配列にオブジェクトを追加します。<br/>
 		/// 挿入位置は最後に追加します。
@@ -614,9 +623,9 @@ namespace NCMB
 		/// <param name="value">配列に追加する値</param>
 		public void AddToList (string key, object value)
 		{
-			this.AddRangeToList (key, new ArrayList{ value });
+			this.AddRangeToList (key, new ArrayList{value});
 		}
-
+		
 		/// <summary>
 		/// キーで指定された配列に複数のオブジェクトを追加します。<br/>
 		/// 挿入位置は最後に追加します。
@@ -641,7 +650,7 @@ namespace NCMB
 					
 					//vauesの各要素を前回のデータに追加する
 					IEnumerator localEnumerator = values.GetEnumerator ();
-					while (localEnumerator.MoveNext ()) {
+					while (localEnumerator.MoveNext()) {
 						object objectValue = (object)localEnumerator.Current;
 						val.Add (objectValue);
 					}
@@ -658,8 +667,8 @@ namespace NCMB
 				NCMBAddOperation operation = new NCMBAddOperation (values);
 				this._performOperation (key, operation);
 			}
-		}
-
+		}	
+		
 		/// <summary>
 		/// キーで指定された配列にオブジェクトを追加します。<br/>
 		/// 今までに登録されていない値のみの追加を行います。<br/>
@@ -669,9 +678,9 @@ namespace NCMB
 		/// <param name="value">配列に追加する値</param>
 		public void AddUniqueToList (string key, object value)
 		{
-			this.AddRangeUniqueToList (key, new ArrayList{ value });
+			this.AddRangeUniqueToList (key, new ArrayList{value});
 		}
-
+		
 		/// <summary>
 		/// キーで指定された配列に複数のオブジェクトを追加します。<br/>
 		/// 今までに登録されていない値のみの追加を行います。<br/>
@@ -687,13 +696,13 @@ namespace NCMB
 			if (this._objectId == null || this._objectId.Equals ("")) {
 				// 登録時
 				//List<object> val = null;
-				ArrayList val = null;//追加
+				ArrayList val = null;
 				object objectKey;
 				//AddUniqe対象のローカルデータの取り出し。objectKeyに入る
 				if (this.estimatedData.TryGetValue (key, out objectKey)) {
 					//取り出した値(前回の値)をvalに追加
-					if ((objectKey is IList)) {//追加
-						val = new ArrayList ((IList)objectKey);//追加
+					if ((objectKey is IList)) {
+						val = new ArrayList ((IList)objectKey);
 					} else {
 						throw new NCMBException (new ArgumentException ("Old value is not an array."));
 					}
@@ -712,7 +721,7 @@ namespace NCMB
 					}
 					
 					IEnumerator localEnumerator = values.GetEnumerator ();
-					while (localEnumerator.MoveNext ()) {
+					while (localEnumerator.MoveNext()) {
 						object objectsValue = (object)localEnumerator.Current;
 						if ((objectsValue is NCMBObject)) {
 							//objrcts2のobjectIdと先ほど生成したexistingObjectIdsのobjectIDが一致した場合、
@@ -728,7 +737,7 @@ namespace NCMB
 								val.Add (objectsValue);
 							}
 						} else if (!val.Contains (objectsValue)) {
-							//更新時。基本的にこちら。重複していない値のみaddする
+							//更新時。重複していない値のみaddする
 							val.Add (objectsValue);
 						}
 					}
@@ -747,7 +756,7 @@ namespace NCMB
 				_performOperation (key, operation);
 			}
 		}
-
+		
 		/// <summary>
 		/// オブジェクトに対し、インクリメントを行います。<br/>
 		/// インクリメントした結果の型はlong(Int64)型になります。
@@ -757,7 +766,7 @@ namespace NCMB
 		{
 			this.Increment (key, 1L);
 		}
-
+		
 		/// <summary>
 		/// オブジェクトに対し、インクリメントを行います。<br/>
 		/// インクリメントした結果の型はlong(Int64)型になります。
@@ -768,7 +777,7 @@ namespace NCMB
 		{
 			this._incrementMerge (key, amount);
 		}
-
+		
 		/// <summary>
 		/// オブジェクトに対し、インクリメントを行います。<br/>
 		/// インクリメントした結果の型はdouble型になります。
@@ -779,7 +788,7 @@ namespace NCMB
 		{
 			this._incrementMerge (key, amount);
 		}
-
+		
 		/// <summary>
 		/// インクリメントの実際の処理を行います。
 		/// </summary> 
@@ -804,9 +813,10 @@ namespace NCMB
 				this._performOperation (key, operation);
 			}
 		}
+		
 		//前回の値と今回のユーザーが指定した数値を足す
 		//firstがestimatedDataに保存されていた前回の値、secondが今回ユーザーが引数に指定した値
-		//ここにくるsecondの型は「Double」か「Long」のみ
+		//secondの型は「Double」か「Long」のみ
 		internal static object _addNumbers (object first, object second)
 		{
 			try {
@@ -829,12 +839,14 @@ namespace NCMB
 			}
 			
 		}
-		//通信URLの取得
+		
+		//通信URLの取得 
 		internal virtual string _getBaseUrl ()
 		{
 			return CommonConstant.DOMAIN_URL + "/" + CommonConstant.API_VERSION + "/classes/" + ClassName;
 		}
-
+		
+		
 		/// <summary>
 		/// オブジェクトの削除を行います。<br/>
 		///通信結果が必要な場合はコールバックを指定するこちらを使用します。
@@ -849,7 +861,7 @@ namespace NCMB
 				//NCMBObject.printLogConnectBefore ("DEBUG DELETE ASYNC", type.ToString (), url, null);
 				NCMBDebug.Log ("【url】:" + url + Environment.NewLine + "【type】:" + type);
 				NCMBConnection con = new NCMBConnection (url, type, null, NCMBUser._getCurrentSessionToken ());
-				con.Connect (delegate(int statusCode, string responseData, NCMBException error) {
+				con.Connect (delegate(int statusCode , string responseData, NCMBException error) {
 					//引数はリスト(中身NCMBObject)とエラーをユーザーに返す
 					NCMBDebug.Log ("【StatusCode】:" + statusCode + Environment.NewLine + "【Error】:" + error + Environment.NewLine + "【ResponseData】:" + responseData);
 					
@@ -874,7 +886,7 @@ namespace NCMB
 			}).BeginInvoke ((IAsyncResult r) => {
 			}, null);
 		}
-
+		
 		/// <summary>
 		/// オブジェクトの削除を行います。<br/>
 		///通信結果が不要な場合はコールバックを指定しないこちらを使用します。
@@ -883,7 +895,7 @@ namespace NCMB
 		{
 			this.DeleteAsync (null);
 		}
-
+		
 		/// <summary>
 		/// 非同期処理でオブジェクトの保存を行います。<br/>
 		/// SaveAsync()を実行してから編集などをしていなく、保存をする必要が無い場合は通信を行いません。<br/>
@@ -899,7 +911,7 @@ namespace NCMB
 			}).BeginInvoke ((IAsyncResult r) => {
 			}, null);
 		}
-
+		
 		/// <summary>
 		/// 非同期処理でオブジェクトの保存を行います。<br/>
 		/// SaveAsync()を実行してから編集などをしていなく、保存をする必要が無い場合は通信を行いません。<br/>
@@ -911,7 +923,8 @@ namespace NCMB
 		{	
 			this.SaveAsync (null);
 		}
-
+		
+		
 		/// <summary>
 		/// 同期通信。関連オブジェクトの保存時に使用する。
 		/// </summary>
@@ -919,7 +932,7 @@ namespace NCMB
 		{		
 			this.Save (null);		
 		}
-
+		
 		/// <summary>
 		/// 同期通信。関連オブジェクトの保存時に使用する
 		/// </summary>
@@ -970,12 +983,12 @@ namespace NCMB
 			IDictionary<string, INCMBFieldOperation> currentOperations = null;
 			currentOperations = this.StartSave ();
 			string content = _toJSONObjectForSaving (currentOperations);
-			NCMBDebug.Log ("content:" + content);
+
 			//ログを確認（通信前）
 			NCMBDebug.Log ("【url】:" + url + Environment.NewLine + "【type】:" + type + Environment.NewLine + "【content】:" + content);
 			// 通信処理
 			NCMBConnection con = new NCMBConnection (url, type, content, NCMBUser._getCurrentSessionToken ());
-			con.Connect (delegate(int statusCode, string responseData, NCMBException error) {
+			con.Connect (delegate(int statusCode , string responseData, NCMBException error) {
 				try {
 					NCMBDebug.Log ("【StatusCode】:" + statusCode + Environment.NewLine + "【Error】:" + error + Environment.NewLine + "【ResponseData】:" + responseData);
 					if (error != null) {
@@ -997,18 +1010,22 @@ namespace NCMB
 				return;
 			});	
 		}
+		
 		//save前処理 　オーバーライド用
 		internal virtual void _beforeSave ()
 		{
 		}
+
 		//save後処理 　オーバーライド用
 		internal virtual void _afterSave (int statusCode, NCMBException error)
 		{
 		}
+
 		//delete後処理 　オーバーライド用
 		internal virtual void _afterDelete (NCMBException error)
 		{
 		}
+		
 		//saveメソッド用のJSONオブジェクトを生成する
 		internal string _toJSONObjectForSaving (IDictionary<string, INCMBFieldOperation> operations)
 		{
@@ -1046,7 +1063,7 @@ namespace NCMB
 			}
 			return jsonString;
 		}
-
+		
 		/// <summary>
 		/// 非同期処理でオブジェクトの取得を行います。<br/>
 		/// 通信結果が必要な場合はコールバックを指定するこちらを使用します。
@@ -1066,7 +1083,7 @@ namespace NCMB
 				//NCMBObject.printLogConnectBefore ("DEBUG FETCH ASYNC CONNECT", type.ToString (), url, null);
 				NCMBDebug.Log ("【url】:" + url + Environment.NewLine + "【type】:" + type);
 				NCMBConnection con = new NCMBConnection (url, type, null, NCMBUser._getCurrentSessionToken ());
-				con.Connect (delegate(int statusCode, string responseData, NCMBException error) {
+				con.Connect (delegate(int statusCode , string responseData, NCMBException error) {
 					NCMBDebug.Log ("【StatusCode】:" + statusCode + Environment.NewLine + "【Error】:" + error + Environment.NewLine + "【ResponseData】:" + responseData);
 					Dictionary<string, object> responseDic = null;
 					try {
@@ -1096,7 +1113,7 @@ namespace NCMB
 			}).BeginInvoke ((IAsyncResult r) => {
 			}, null);
 		}
-
+		
 		/// <summary>
 		/// 非同期処理でオブジェクトの取得を行います。<br/>
 		/// 通信結果が不要な場合はコールバックを指定しないこちらを使用します。
@@ -1106,6 +1123,7 @@ namespace NCMB
 		{
 			this.FetchAsync (null);
 		}
+		
 		/*
 		private static List<string> fetchAllIds (List<NCMBObject> objects)
 		{
@@ -1125,6 +1143,7 @@ namespace NCMB
 			return ids;
 		}
 		*/
+
 		/*
 		/// <summary>
 		/// 非同期処理で複数オブジェクトの取得を行います。<br/>
@@ -1148,6 +1167,7 @@ namespace NCMB
 		
 		}
 		*/
+		
 		/// <summary>
 		/// オブジェクトに指定したkeyが、存在しているかの判断を行います。
 		/// </summary>
@@ -1161,7 +1181,7 @@ namespace NCMB
 			}
 			return result;
 		}
-
+		
 		/// <summary>
 		/// 指定したクラス名,ObjectIdのオブジェクト生成を行います。<br/>
 		/// </summary>
@@ -1186,7 +1206,7 @@ namespace NCMB
 			} 
 			return localNCMBObject;
 		}
-
+		
 		internal virtual void _mergeFromServer (Dictionary<string, object> responseDic, bool completeData)
 		{
 			object obj;
@@ -1224,9 +1244,8 @@ namespace NCMB
 					}
 				}
 
-				//この処理を上の処理に持っていくと不具合が発生
-				//dataAvailabilityにキー"acl"を設定前にresponseDicからRemoveされThisのGetのチェックでエラー
-				if (responseDic.TryGetValue ("acl", out value)) {//今回はなし
+	
+				if (responseDic.TryGetValue ("acl", out value)) {
 					NCMBACL acl = NCMBACL._createACLFromJSONObject ((Dictionary<string,object>)value);
 					this.serverData ["acl"] = acl;
 					responseDic.Remove ("acl");
@@ -1238,6 +1257,7 @@ namespace NCMB
 				Monitor.Exit (obj);
 			}
 		}
+		
 		//After Saveの処理
 		internal void _handleSaveResult (bool success, Dictionary <string, object> responseDic, IDictionary <string, INCMBFieldOperation> operationBeforeSave)
 		{
@@ -1253,7 +1273,7 @@ namespace NCMB
 					this._updateLatestEstimatedData (); //add only to update the estimate data save process
 
 				} else {
-					//通信失敗時の処理。追加した空の履歴データにデータが入っていればマージする。チケット#34927参照
+					//通信失敗時の処理。追加した空の履歴データにデータが入っていればマージする
 					LinkedListNode<IDictionary<string, INCMBFieldOperation>> linkedListNode = this.operationSetQueue.Find (operationBeforeSave);
 					IDictionary<string, INCMBFieldOperation> value = linkedListNode.Next.Value;
 					this.operationSetQueue.Remove (linkedListNode);
@@ -1273,6 +1293,7 @@ namespace NCMB
 				Monitor.Exit (obj);
 			}
 		}
+		
 		//After Fetch の処理
 		internal void _handleFetchResult (bool success, Dictionary<string, object> responseDic)
 		{
@@ -1289,6 +1310,7 @@ namespace NCMB
 				Monitor.Exit (obj);
 			}
 		}
+		
 		//After Delete の処理
 		private void _handleDeleteResult (bool success)
 		{
@@ -1309,18 +1331,23 @@ namespace NCMB
 				Monitor.Exit (obj);
 			}
 		}
+		
+		
 		//作成日時の設定
 		private void _setCreateDate (string resultDate)
 		{
 			string targetDateFormat = "yyyy-MM-dd'T'HH:mm:ss.fff'Z'";
 			this._createDate = DateTime.ParseExact ((string)resultDate, targetDateFormat, null);
 		}
+		
 		//更新日時の設定
 		private void _setUpdateDate (string resultDate)
 		{
 			string targetDateFormat = "yyyy-MM-dd'T'HH:mm:ss.fff'Z'";
 			this._updateDate = DateTime.ParseExact ((string)resultDate, targetDateFormat, null);
 		}
+		
+
 		//This method is to save object Json data to disk by using file stream **** Using global variable
 		internal void _saveToVariable ()
 		{
@@ -1335,6 +1362,8 @@ namespace NCMB
 				Monitor.Exit (obj);
 			}
 		}
+		
+		
 		//this method is to get data and create NCMBObject **** Using global variable
 		internal static NCMBObject _getFromVariable ()
 		{ 
@@ -1353,6 +1382,7 @@ namespace NCMB
 			}
 			return null;
 		}
+		
 		//This method is to save object Json data to disk by using file stream **** Using disk storage
 		internal void _saveToDisk (string fileName)
 		{
@@ -1362,7 +1392,7 @@ namespace NCMB
 			try {
 				string jsonData = this._toJsonDataForDataFile ();
 				//save to file
-				using (StreamWriter sw = new StreamWriter (filePath, false, Encoding.UTF8)) {
+				using (StreamWriter sw = new StreamWriter(filePath, false , Encoding.UTF8 )) {
 					sw.Write (jsonData);
 					sw.Close ();					
 				}
@@ -1372,6 +1402,7 @@ namespace NCMB
 				Monitor.Exit (obj);
 			}
 		}
+		
 		//this method is to get data and create NCMBObject **** Using disk storage
 		internal static NCMBObject _getFromDisk (string fileName)
 		{ 
@@ -1392,7 +1423,7 @@ namespace NCMB
 			}
 			return null;
 		}
-
+		
 		internal static string _getDiskData (string fileName)
 		{
 			// Handle any problems that might arise when reading the text
@@ -1435,7 +1466,8 @@ namespace NCMB
 			}
 			
 		}
-		//create json from this object data
+		
+		//create json from this object data 
 		private string _toJsonDataForDataFile ()
 		{
 			string jsonString = "";
@@ -1464,7 +1496,8 @@ namespace NCMB
 			return jsonString;
 		
 		}
-		/*
+		
+		
 		private void printLog (string debugString1, string debugString2, string debugString3)
 		{
 			//NCMBDebug.Log ("[" + debugString1 + "] [ClassName] :" + this.ClassName);
@@ -1513,12 +1546,13 @@ namespace NCMB
 			//NCMBDebug.Log ("[" + printString + "] Response data: " + responseData);
 			//NCMBDebug.Log ("[" + printString + "] Error: " + error);
 		}
-		*/
+
 		void _setDefaultValues ()
 		{
 			if (NCMBACL._getDefaultACL () != null) {			
 				ACL = NCMBACL._getDefaultACL ();
 			}	
 		}
+		
 	}
 }

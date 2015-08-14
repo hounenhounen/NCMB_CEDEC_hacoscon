@@ -88,7 +88,7 @@ namespace  NCMB
 			get {
 				return (string)this ["sessionToken"];
 			}
-			internal set {//注意：下記コード実行で履歴データ(NCMBSetOperation)がセットされる
+			internal set {
 				this ["sessionToken"] = value;
 			}
 		}
@@ -100,7 +100,7 @@ namespace  NCMB
 			get {
 				if (_currentUser != null) {
 					return _currentUser;
-				}
+				}	
 				NCMBUser objUser = null;
 				objUser = (NCMBUser)_getFromVariable (); //Get from variable first
 				if (objUser == null) {

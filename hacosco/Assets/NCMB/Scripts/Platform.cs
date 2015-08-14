@@ -47,7 +47,7 @@ namespace NCMB.Internal
 			try {
 				Platform.Queue.Enqueue (action);
 			} finally {
-				Platform.QueueLock.ExitWriteLock ();//確実にロック解除
+				Platform.QueueLock.ExitWriteLock ();//ロック解除
 			}
 		}
 

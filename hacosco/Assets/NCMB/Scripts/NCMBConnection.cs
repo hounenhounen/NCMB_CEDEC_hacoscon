@@ -25,9 +25,7 @@ using System.Globalization;
 using System.Collections.Generic;
 
 //Dictionary
-using System.IO;
-
-//strem
+using System.IO;//strem
 using System.Security.Cryptography;
 using NCMB.Internal;
 
@@ -35,38 +33,25 @@ namespace NCMB.Internal
 {
 	internal class NCMBConnection
 	{
-		private static readonly string RESPONSE_SIGNATURE = "X-NCMB-Response-Signature";
-		//レスポンスシグネチャ　キー
-		private static readonly string SIGNATURE_METHOD_KEY = "SignatureMethod";
-		//シグネチャメソッド　キー
-		private static readonly string SIGNATURE_METHOD_VALUE = "HmacSHA256";
-		//シグネチャメソッド　値
-		private static readonly string SIGNATURE_VERSION_KEY = "SignatureVersion";
-		//シグネチャバージョン　キー
-		private static readonly string SIGNATURE_VERSION_VALUE = "2";
-		//シグネチャバージョン　値
-		private static readonly string HEADER_SIGNATURE = "X-NCMB-Signature";
-		//シグネチャヘッダー　キー
-		private static readonly string HEADER_APPLICATION_KEY = "X-NCMB-Application-Key";
-		//アプリケションキー　キー
-		private static readonly string HEADER_TIMESTAMP_KEY = "X-NCMB-Timestamp";
-		//タイムスタンプ　キー
-		private static readonly string HEADER_ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-		//Access-Control　キー
-		private static readonly string HEADER_SESSION_TOKEN = "X-NCMB-Apps-Session-Token";
-		//セッショントークン
+		private static readonly string RESPONSE_SIGNATURE = "X-NCMB-Response-Signature";//レスポンスシグネチャ　キー
+		private static readonly string SIGNATURE_METHOD_KEY = "SignatureMethod";//シグネチャメソッド　キー
+		private static readonly string SIGNATURE_METHOD_VALUE = "HmacSHA256";	//シグネチャメソッド　値
+		private static readonly string SIGNATURE_VERSION_KEY = "SignatureVersion";//シグネチャバージョン　キー
+		private static readonly string SIGNATURE_VERSION_VALUE = "2";//シグネチャバージョン　値
+		private static readonly string HEADER_SIGNATURE = "X-NCMB-Signature";//シグネチャヘッダー　キー
+		private static readonly string HEADER_APPLICATION_KEY = "X-NCMB-Application-Key"; 	//アプリケションキー　キー
+		private static readonly string HEADER_TIMESTAMP_KEY = "X-NCMB-Timestamp"; 	//タイムスタンプ　キー
+		private static readonly string HEADER_ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";//Access-Control　キー
+		private static readonly string HEADER_SESSION_TOKEN = "X-NCMB-Apps-Session-Token";//セッショントークン
 		private static readonly int REQUEST_TIME_OUT = 10000;
-		private string _applicationKey = "";
-		private string _clientKey = "";
-		private string _headerTimestamp = "";
-		//タイムスタンプ　値
-		private ConnectType _method;
-		//コンテントタイプ(POST,PUT,GET,DELETE)
-		private string _url = "";
-		//リクエスト先URL
-		private string _content = "";
-		//JSON化された送信データ
-		private string _sessionToken = "";
+		private string         _applicationKey = "";
+		private string         _clientKey = "";
+		private string         _headerTimestamp = "";//タイムスタンプ　値
+		private ConnectType    _method;	//コンテントタイプ(POST,PUT,GET,DELETE)
+		private string         _url = "";//リクエスト先URL
+		private string         _content = "";//JSON化された送信データ
+		private string         _sessionToken = "";
+		
 		//コンストラクタ
 		internal NCMBConnection (String url, ConnectType method, string content, string sessionToken)
 		{
@@ -77,17 +62,17 @@ namespace NCMB.Internal
 			this._applicationKey = NCMBSettings.ApplicationKey;
 			this._clientKey = NCMBSettings.ClientKey;
 		}
+	
 		//通信処理(同期通)
 		internal void Connect (HttpClientCallback callback)
 		{
-			//try {
-			//証明書更新　更新しないとSSLサイトにアクセス出来ない
+			//SSLサイトにアクセスするため証明書更新
 			ServicePointManager.ServerCertificateValidationCallback = delegate {
 				return true;
 			}; 
 			//リクエストの作成
 			HttpWebRequest req = _returnRequest ();
-			//非同期データ送信　BeginGetRequestStreamでくくらなければ同期通信
+			//非同期データ送信
 			_Connection (req, callback);
 		}
 
@@ -113,31 +98,31 @@ namespace NCMB.Internal
 
 			try {
 				//通常処理
-				httpResponse = (HttpWebResponse)req.GetResponse ();//①通信
-				streamResponse = httpResponse.GetResponseStream (); //②通信結果からResponseデータ作成
-				statusCode = (int)httpResponse.StatusCode; //③Responseデータからステータスコード取得
-				streamRead = new StreamReader (streamResponse); //④Responseデータからデータ取得
-				responseData = streamRead.ReadToEnd ();//⑤書き出したデータを全てstringに書き出し
+				httpResponse = (HttpWebResponse)req.GetResponse ();
+				streamResponse = httpResponse.GetResponseStream ();
+				statusCode = (int)httpResponse.StatusCode;
+				streamRead = new StreamReader (streamResponse);
+				responseData = streamRead.ReadToEnd ();
 
 			} catch (WebException ex) {
 
 				//API側からのエラー処理
-				using (WebResponse webResponse = ex.Response) {//①WebExceptionからWebResponseを取得
+				using (WebResponse webResponse = ex.Response) {
 					error = new NCMBException ();
 					error.ErrorMessage = ex.Message;
 
-					streamResponse = webResponse.GetResponseStream ();//②WebResponsからResponseデータ作成
-					streamRead = new StreamReader (streamResponse); //③Responseデータからデータ取得
-					responseData = streamRead.ReadToEnd ();//④書き出したデータを全てstringに書き出し
+					streamResponse = webResponse.GetResponseStream ();
+					streamRead = new StreamReader (streamResponse);
+					responseData = streamRead.ReadToEnd ();
 
-					var jsonData = MiniJSON.Json.Deserialize (responseData) as Dictionary<string,object>;//⑤Dictionaryに変換
-					var hashtableData = new Hashtable (jsonData);//⑥Hashtableに変換　必要？
+					var jsonData = MiniJSON.Json.Deserialize (responseData) as Dictionary<string,object>;
+					var hashtableData = new Hashtable (jsonData);
 
-					error.ErrorCode = (hashtableData ["code"].ToString ());//⑦Hashtableから各keyのvalue取得
+					error.ErrorCode = (hashtableData ["code"].ToString ());
 					error.ErrorMessage = (hashtableData ["error"].ToString ());
 
-					httpResponse = (HttpWebResponse)webResponse;//⑧WebResponseをHttpWebResponseに変換
-					statusCode = (int)httpResponse.StatusCode;//⑨httpWebResponseからステータスコード取得
+					httpResponse = (HttpWebResponse)webResponse;
+					statusCode = (int)httpResponse.StatusCode;
 				}
 			} finally {
 				if (httpResponse != null) {
@@ -201,11 +186,11 @@ namespace NCMB.Internal
 			NCMBDebug.Log ("【responseMakeSignature】　" + responseMakeSignature);
 			NCMBDebug.Log ("検証実行");
 		}
-		/*
+		
 		//通信処理(非同期通)
 		internal void ConnectAsync (HttpClientCallback callback)
 		{
-			//証明書更新　更新しないとSSLサイトにアクセス出来ない
+			//証明書更新
 			ServicePointManager.ServerCertificateValidationCallback = delegate {
 				return true;
 			}; 
@@ -215,30 +200,30 @@ namespace NCMB.Internal
 			if (_method == ConnectType.POST || _method == ConnectType.PUT) {
 				//リクエスト非同期処理
 				IAsyncResult requestResult = req.BeginGetRequestStream (ar => {
-					Stream postStream = req.EndGetRequestStream (ar);                //非同期要求を終了
-					byte[] postDataBytes = Encoding.Default.GetBytes (_content);    //送信データ作成。バイト型配列に変換
-					postStream.Write (postDataBytes, 0, postDataBytes.Length);      //送信
-					postStream.Close ();                                           //リリース
+					Stream postStream = req.EndGetRequestStream (ar);               
+					byte[] postDataBytes = Encoding.Default.GetBytes (_content);    
+					postStream.Write (postDataBytes, 0, postDataBytes.Length);     
+					postStream.Close ();                                           
 					IAsyncResult responsResult = req.BeginGetResponse (ar2 => {
-						HttpWebResponse response = (HttpWebResponse)req.EndGetResponse (ar2); //非同期要求を終了
-						Stream streamResponse = response.GetResponseStream (); //応答データを受信するためのStreamを取得
-						int statusCode = (int)response.StatusCode; //ステータスコード取得
-						StreamReader streamRead = new StreamReader (streamResponse); //レスポンスデータ取得
+						HttpWebResponse response = (HttpWebResponse)req.EndGetResponse (ar2); 
+						Stream streamResponse = response.GetResponseStream ();
+						int statusCode = (int)response.StatusCode; 
+						StreamReader streamRead = new StreamReader (streamResponse);
 						string responseData = streamRead.ReadToEnd ();
-						// 閉じる.リリース
+						// リリース
 						streamResponse.Close ();
 						streamRead.Close ();
 						response.Close ();
-						callback (statusCode, responseData, null);//コールバックを返す
+						callback (statusCode, responseData, null);
 					}, null);
 				}, null);
-			} else if (_method == ConnectType.GET || _method == ConnectType.DELETE) {  //コールバックをメソッドにしなくてもこう言う書き方も有りです
+			} else if (_method == ConnectType.GET || _method == ConnectType.DELETE) {  
 				IAsyncResult responseResult = req.BeginGetResponse (ar => {
 					try {
 						HttpWebResponse res = (HttpWebResponse)req.EndGetResponse (ar);
 						int statusCode = (int)res.StatusCode;
 						Stream streamResponse = res.GetResponseStream ();
-						StreamReader streamRead = new StreamReader (streamResponse); //レスポンスデータ取得
+						StreamReader streamRead = new StreamReader (streamResponse);
 						string responseData = streamRead.ReadToEnd ();
 						callback (statusCode, responseData, null);
 					} catch (WebException e) {
@@ -247,7 +232,7 @@ namespace NCMB.Internal
 				}, null);
 			}
 		}
-		*/
+		
 		//同期データ送信
 		private HttpWebRequest _sendRequest (HttpWebRequest req, ref NCMBException error)
 		{
@@ -267,7 +252,7 @@ namespace NCMB.Internal
 			}
 			return req;
 		}
-
+	
 		/// <summary>
 		/// リクエストの生成を行う
 		/// </summary>
@@ -379,7 +364,7 @@ namespace NCMB.Internal
 			string timestamp = utcTime.ToString ("yyyy-MM-dd'T'HH:mm:ss.fff'Z'"); // 指定した書式で日付を文字列に変換する・ミリ秒まで取得。最後にZをつける
 			_headerTimestamp = timestamp.Replace (":", "%3A"); //文字列の置換
 		}
-
+		
 		/// <summary>
 		/// セッショントークン有効稼働かの処理を行う
 		/// </summary>
@@ -392,5 +377,6 @@ namespace NCMB.Internal
 				NCMBDebug.Log ("CurrentUser is found, sessionToken info error, delete localdata");
 			}
 		}
+				
 	}
 }
