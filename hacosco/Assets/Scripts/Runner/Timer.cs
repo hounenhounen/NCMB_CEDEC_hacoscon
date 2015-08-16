@@ -77,10 +77,5 @@ public class Timer : MonoBehaviour {
 	void OnGoal(){
 		goal = true;
 		//クラスの指定
-		NCMBObject timeClass = new NCMBObject("Time"); //カラムと挿入するデータの指定
-		timeClass["time"] = lapTime; //非同期でのアップロード
-
-		timeClass.SaveAsync();
-
 	}
 }

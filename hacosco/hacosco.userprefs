@@ -1,14 +1,10 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Ghost/Bg_ghost.cs">
+  <MonoDevelop.Ide.Workspace />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Runner/Timer.cs">
     <Files>
-      <File FileName="Assets/Scripts/Ghost/Ghost.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Runner/Runner.cs" Line="49" Column="38" />
-      <File FileName="Assets/Scripts/Camera/MyCameraController.cs" Line="11" Column="45" />
-      <File FileName="Assets/Scripts/Camera/StartCameraController.cs" Line="70" Column="35" />
-      <File FileName="Assets/Scripts/Runner/Timer.cs" Line="82" Column="3" />
-      <File FileName="Assets/Scripts/Ghost/Bg_ghost.cs" Line="13" Column="3" />
-      <File FileName="Assets/NCMB/Scripts/NCMBException.cs" Line="134" Column="1" />
+      <File FileName="Assets/Scripts/Ghost/Bg_ghost.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Runner/Runner.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Runner/Timer.cs" Line="79" Column="11" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
